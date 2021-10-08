@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Assets\boids.cs" />
     <Compile Include="Assets\parametersBoids.cs" />
+    <Compile Include="Assets\hand.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
