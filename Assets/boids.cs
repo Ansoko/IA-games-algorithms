@@ -121,10 +121,10 @@ public class boids : MonoBehaviour
         {
             if (Mathf.Abs((obst.transform.position - transform.position).magnitude) < distanceRepousse)
             {
-                avg = avg - (obst.transform.position - transform.position);
+                avg -= (obst.transform.position - transform.position);
             }
         }
-        return avg*7; //*7 car direction plus importante que les autres
+        return avg*10; //*10 car direction plus importante que les autres
     }
 
     //IEnumerator updateboid()
