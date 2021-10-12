@@ -7,7 +7,7 @@ public class parametersBoids : MonoBehaviour
     //paramètres
     public float maxVelocity = 10;
     public float distanceVoisin = 5f;
-    public float distanceMain = 12f;
+    public float distanceMain = 7f;
     public float distanceRepousse = 2f;
     public float velociteVersVoisins = 100f;
     public float velociteRapprocher = 40f;
