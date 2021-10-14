@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class boids : MonoBehaviour
 {
+    public Sprite dead;
     public Vector3 Velocity;
 
     public List<boids> Neighbors = new List<boids>(); //liste des voisins du boid
@@ -22,7 +23,7 @@ public class boids : MonoBehaviour
     public float distanceMain;
 
     //state machine
-    public int state; // 1 = search, 2 = chase hand, 3 = flee, 4 = chase human 
+    public int state; // 1 = search, 2 = chase hand, 3 = flee, 4 = chase human , 5 = dead
 
     void Start()
     {
@@ -115,18 +116,35 @@ public class boids : MonoBehaviour
 
     bool humanIsSeen() //human en vuuuue (de loin)
     {
-        Transform[] allChildren = humans.GetComponentsInChildren<Transform>();
-        foreach (var child in allChildren)
-        {
-            float distX = transform.position.x - child.transform.position.x;
-            float distY = transform.position.y - child.transform.position.y;
-            if (Mathf.Sqrt((distX * distX) + (distY * distY)) < distanceMain)
+		for (int i = 0; i < humans.transform.childCount; i++)
+		{
+            if (humans.transform.GetChild(i).name == "humans") continue;
+            if (humans.transform.GetChild(i).GetType() == GetType()) continue;
+            //Debug.Log("aah " + humans.transform.GetChild(i).name);
+            Vector3 dist = transform.position - humans.transform.GetChild(i).transform.position;
+            dist.z = 0;
+            if (dist.magnitude < distanceMain)
             {
+                if (dist.magnitude < 1f)
+                {
+                    humans.transform.GetChild(i).GetComponent<human>().toZombie();
+                    humans.transform.GetChild(i).transform.parent = transform.parent;
+                    return false;
+                }
                 return true;
             }
-        }
+		}
         return false;
 
+    }
+    public void isDead()
+    {
+        Debug.Log("headshot " + name + " !");
+        GetComponent<SpriteRenderer>().sprite = dead;
+        tag = "Untagged";
+        state = 5;
+        GetComponent<boids>().enabled = false;
+        this.transform.parent = GameObject.Find("dead").transform;
     }
     Vector3 moveToHuman() //attaquer les humains
     {
@@ -152,13 +170,18 @@ public class boids : MonoBehaviour
         return avg;
     }
 
+    
     void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(transform.position, distanceRepousse);
         Gizmos.DrawWireSphere(transform.position, distanceVoisin);
         Gizmos.DrawWireSphere(transform.position, distanceMain);
         Gizmos.DrawLine(transform.position, Velocity+transform.position);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, 1f);
     }
+    
 
     Vector3 avoidWall() //s'écarter des murs
     {
@@ -191,6 +214,7 @@ public class boids : MonoBehaviour
         foreach (var boid in boidlist)
         {
             if (boid.name == gameObject.name) { continue; }
+            if (boid.state == 5) continue;
             //Debug.Log(boid.name);
             float dist = distance(boid);
             if (dist < distanceVoisin)
@@ -203,7 +227,7 @@ public class boids : MonoBehaviour
 
 	private void Update()
 	{
-        Debug.Log(name + " : state "+state);
+        //Debug.Log(name + " : state "+state);
         Vector3 v1=new Vector3(0,0,0), 
             v2 = new Vector3(0, 0, 0), 
             v3 = new Vector3(0, 0, 0), 
@@ -260,6 +284,7 @@ public class boids : MonoBehaviour
             case 4: //follow human
                 if (humanIsSeen()) //state 4
                 {
+
                     searchNeighbors();
                     v1 = moveCloser();
                     v2 = moveWith();
@@ -275,6 +300,9 @@ public class boids : MonoBehaviour
                 }
                 //else state 1
                 state = 1;
+                break;
+
+            case 5: //is ded, do nothin'
                 break;
 
             default:

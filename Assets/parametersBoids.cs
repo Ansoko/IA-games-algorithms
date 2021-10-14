@@ -15,4 +15,22 @@ public class parametersBoids : MonoBehaviour
 
     //obstacles
     public List<GameObject> obstacles;
+
+    public GameObject enemies;
+    public GameObject humans;
+
+	private void Update()
+	{
+        //victoire du défaite
+        if (humans.transform.childCount == 0)
+        {
+            Debug.Log("gagné !");
+            Time.timeScale = 0;
+        }
+        else if (enemies.transform.childCount == 0)
+        {
+            Debug.Log("perdu...");
+            Time.timeScale = 0;
+        }
+    }
 }

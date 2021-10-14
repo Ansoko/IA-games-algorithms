@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class human : MonoBehaviour
 {
+    public Sprite zombie;
     public Vector3 Velocity;
 
     public List<human> Neighbors = new List<human>(); //liste des voisins du boid
@@ -11,6 +12,7 @@ public class human : MonoBehaviour
 
     private parametersBoids param;
     public Vector3 mousePos;
+    private GameObject zombies;
 
     //paramètres
     public float maxVelocity;
@@ -20,11 +22,9 @@ public class human : MonoBehaviour
     public float velociteRapprocher;
     public float distanceMain;
 
-    //state machine
-    public int state; // 1 = search, 2 = chase, 3 = flee
-
     void Start()
     {
+        zombies = GameObject.Find("enemies");
         param = GameObject.Find("Main Camera").GetComponent<parametersBoids>();
         distanceVoisin = param.distanceVoisin;
         maxVelocity = param.maxVelocity;
@@ -41,7 +41,50 @@ public class human : MonoBehaviour
             boidlist.Add(b.GetComponent<human>());
         }
 
-        state = 1;  //default state : searching
+        StartCoroutine(killZombies());
+
+    }
+
+    IEnumerator killZombies()
+    {
+        while (isActiveAndEnabled)
+        {
+            for (int i = 0; i < zombies.transform.childCount; i++)
+            {
+                if (zombies.transform.GetChild(i).name == "enemies") continue;
+                if (zombies.transform.GetChild(i).GetType() == GetType()) continue;
+                if (zombies.transform.GetChild(i).GetComponent<boids>().state == 5) continue; //déjà mort
+                Vector3 dist = transform.position - zombies.transform.GetChild(i).transform.position;
+                dist.z = 0;
+                if (dist.magnitude < distanceVoisin)
+                {
+                    zombies.transform.GetChild(i).GetComponent<boids>().isDead();
+                    /*
+                    if (Random.Range(0f, 2f) > 1)
+                    {
+                        zombies.transform.GetChild(i).GetComponent<boids>().isDead();
+                    }
+                    else
+                    {
+                        Debug.Log(name + " missed.");
+                    }
+                    */
+                    break;
+                }
+            }
+            yield return new WaitForSeconds(1);
+        }
+
+        
+    }
+
+    public void toZombie()
+    {
+        Debug.Log("miam miam " + name + " taste good");
+        GetComponent<SpriteRenderer>().sprite = zombie;
+        tag = "boid";
+        GetComponent<boids>().enabled = true;
+        GetComponent<human>().enabled = false;
     }
 
     float distance(human boid) //distance par rapport à un autre boid
@@ -93,20 +136,6 @@ public class human : MonoBehaviour
         return (avg - Velocity) / velociteVersVoisins;
     }
 
-    bool isSeen() //la souris est-elle vue ?
-    {
-        mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
-        float distX = transform.position.x - mousePos.x;
-        float distY = transform.position.y - mousePos.y;
-        if (Mathf.Sqrt((distX * distX) + (distY * distY)) < distanceMain)
-        {
-            return true;
-        }
-        return false;
-
-    }
-
     Vector3 moveToward() //bouger vers la souris
     {
         return (mousePos - transform.position) * 4 / velociteVersVoisins; //la main compte autant que 4 zombies
@@ -146,7 +175,10 @@ public class human : MonoBehaviour
         foreach (var boid in boidlist)
         {
             if (boid.name == gameObject.name) { continue; }
-            //Debug.Log(boid.name);
+            if (!boid.isActiveAndEnabled) {
+                boidlist.Remove(boid);
+                break;
+            }
             float dist = distance(boid);
             if (dist < distanceVoisin)
             {
