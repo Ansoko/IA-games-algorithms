@@ -6,6 +6,8 @@ TagManager:
   tags:
   - boid
   - human
+  - Cow
+  - SceneManager
   layers:
   - Default
   - TransparentFX

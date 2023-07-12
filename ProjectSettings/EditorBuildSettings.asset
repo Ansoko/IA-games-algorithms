@@ -6,6 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Menu/Menu.unity
+    guid: a2a2b656e26ed924698748bf9f0caf38
+  - enabled: 1
     path: Assets/Boids/Boids.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Genetic/Genetic.unity
+    guid: f80d877248049e949b39efa7ef7e392e
+  - enabled: 1
+    path: Assets/Astar/astar.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Dijktra/Dijkstra.unity
+    guid: 534e4a6089fbd5e429c89a2a586d8dde
   m_configObjects: {}
